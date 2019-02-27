@@ -20,6 +20,7 @@ func CompareList(detects []string, rights []string) (correctFlag int) {
         correctFlag = FALSE
         return
     }
+
 	for _, detect := range detects {
 		singleCorrectFlag := false
 		for _, right := range rights {
@@ -63,14 +64,14 @@ func Compare(record *Record) {
 	} else if compareCNameFlag {
 		record.compareType = "CNAME"
 	}
-	//查询超时
-	if record.timeoutFlag {
-		record.result = "0-00-0-0-00"
-		return
-	}
 	//未获取到配置
 	if !compareAFlag && !compareCNameFlag {
 		record.result = "0-00-1-0-00"
+		return
+	}
+	//查询超时
+	if record.timeoutFlag {
+		record.result = "0-00-0-0-00"
 		return
 	}
 	//无效应答
@@ -86,11 +87,8 @@ func Compare(record *Record) {
 		if correctCNameFlag == TRUE {
 			//CNAME正确&A记录空
 			record.result = "1-01-1-1-001"
-		} else {
-			//CNAME错误
-			record.result = "0-11-1-1-01"
+			return
 		}
-		return
 	}
 	//A记录与CNAME均需要比较，其余情况
 	if compareAFlag && compareCNameFlag {
@@ -110,7 +108,8 @@ func Compare(record *Record) {
 		return
 	}
 	//结果判断
-    if correctAFlag == TRUE && correctCNameFlag == TRUE {
+	fmt.Println("correct:", correctAFlag, correctCNameFlag)
+    if correctAFlag + correctCNameFlag > 0 {
         //比对一致
         record.result = "0-11-1-0-00"
         return
@@ -140,7 +139,7 @@ func CompareBox(record *Record, index int) {
 func ControlCompareRoutine(tasks *Task) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	InfoLog("ControlCompareRoutine-records")
-	fmt.Println(len(tasks.records))
+	fmt.Println("compare-len:", len(tasks.records))
 	for index, record := range tasks.records {
 		go CompareBox(record, index)
 	}

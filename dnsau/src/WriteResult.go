@@ -17,7 +17,7 @@ func GenerateResultLine(record *Record, taskID string, taskName string) {
 	detectCNamesStr := strings.Join(record.detectCNames, "+")
 	resultList = append(resultList,
 		taskName, taskID, record.rightRecord.domain,"1",record.authServerNames, record.compareType,
-		detectAsStr +"/"+ detectCNamesStr, record.result,"61.130.254.36","dnscname" + "\n")
+		detectAsStr +"/"+ detectCNamesStr, record.result,"8.8.8.8","dnscname" + "\n")
 	resultStr := strings.Join(resultList, ";")
 	resultLine <- resultStr
 	return
@@ -39,7 +39,7 @@ func ControlWriteResultRoutine(tasks *Task) (err error){
 	}
     totalNum := len(tasks.records)
     err = ioutil.WriteFile(ResultPath + tasks.taskID + ".result",
-        []byte(tasks.taskID + "|" + strconv.Itoa(totalNum) + "\n" + resultContent), 0644)
+        []byte(tasks.taskID + "|" + strconv.Itoa(totalNum) + "|" + tasks.subID + "\n" + resultContent), 0644)
 
 	return
 }
