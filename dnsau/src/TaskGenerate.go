@@ -2,59 +2,50 @@ package main
 
 import (
 	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"strings"
-	"fmt"
 )
 
 const ConfPath = "/tmp/conf/busi.conf"
 
 type Record struct {
-	rightRecord *RightRecord
-	detectAs []string
-	detectCNames []string
+	domain          string
+	detectAs        []string
+	detectCNames    []string
 	authServerNames string
-	timeoutFlag bool
-	result string
-	compareType string
+	timeoutFlag     bool
 }
 
 type Task struct {
-	taskID string
+	taskID   string
 	taskName string
-	uuid string
-	subID string
-	records []*Record
+	uuid     string
+	records  []*Record
 }
 
 func GetTaskConfig() (task *Task, err error) {
 	task = new(Task)
 	taskConfigBase64, err := ioutil.ReadFile(ConfPath)
 	if err != nil {
-        return nil, err
-    }
+		return nil, err
+	}
 	taskConfigB, err := base64.StdEncoding.DecodeString(string(taskConfigBase64))
 	if err != nil {
-        return nil, err
-    }
+		return nil, err
+	}
 	taskConfig := strings.Split(string(taskConfigB), ";")
 	fmt.Println(taskConfig)
 
-	task.taskID = taskConfig[1]
-
+	task.taskID = taskConfig[0]
+	task.taskName = taskConfig[1]
 	//组合域名、正确值
-	domains := taskConfig[4:len(taskConfig)-1]
-	rightRecords, err := getRightValue(domains)
-	if err != nil {
-        return nil, err
-    }
-	for _, rightRecord := range rightRecords {
+	domains := taskConfig[2 : len(taskConfig)-1]
+	for _, domain := range domains {
 		record := new(Record)
-		record.rightRecord = rightRecord
+		record.domain = domain
 		task.records = append(task.records, record)
 	}
-	task.taskName = taskConfig[2]
-	task.uuid = taskConfig[len(taskConfig)-2]
-	task.subID = taskConfig[len(taskConfig)-1]
+	task.uuid = taskConfig[len(taskConfig)-1]
 	return
 }

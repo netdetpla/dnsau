@@ -1,5 +1,5 @@
 FROM scratch
 
-ADD ["bin/dnsau-bin", "/"]
+ADD ["bin/dnsau.b", "/"]
 
-CMD ["/dnsau-bin"]
+CMD ["/dnsau.b"]

@@ -33,7 +33,7 @@ func SendDNSQuery(record *Record) {
     i:=0
     Loop:
     var dig Dig
-    rsp,err := dig.Trace(record.rightRecord.domain)
+    rsp,err := dig.Trace(record.domain)
     if err != nil{
 		if i < 3 {
             i++

@@ -1,15 +1,11 @@
 package main
 
 import (
-	"os"
 	"fmt"
-	"strconv"
-	"time"
+	"os"
 )
 
 func main() {
-	randString := ""
-	_ = SendUDP("", randString, "start")
 	err := os.Mkdir(AppstatusPath, 0777)
 	if err != nil && !os.IsExist(err) {
 		fmt.Println(err.Error())
@@ -21,12 +17,12 @@ func main() {
 	}
 	//网络检查
 	netCheckFlag := NetCheck()
-    if netCheckFlag == 0 { 
-        ConnectFail()
-        WriteError2Appstatus("Can not connect to the Internet.", 22) 
+    if netCheckFlag == 0 {
+       ConnectFail()
+       WriteError2Appstatus("Can not connect to the Internet.", 22)
     } else if netCheckFlag == -1 {
-        ConnectFail()
-        WriteError2Appstatus("Ping check timeout.", 21) 
+       ConnectFail()
+       WriteError2Appstatus("Ping check timeout.", 21)
     }
 	//任务开始
 	TaskStart()
@@ -38,8 +34,6 @@ func main() {
 		WriteError2Appstatus(err.Error(), 3)
 	}
 	GetConfSuccess()
-	startTime := time.Now().Unix()
-	_ = SendUDP(tasks.taskID, tasks.subID, "run")
 	//任务执行
 	TaskRun()
 	err = ControlDNSQueryRoutine(tasks)
@@ -47,7 +41,6 @@ func main() {
 		TaskRunFail()
 		WriteError2Appstatus(err.Error(), 1)
 	}
-	ControlCompareRoutine(tasks)
 	TaskRunSuccess()
 	err = SendProcess(tasks.taskID, tasks.uuid, "DomainInfo", len(tasks.records), true)
 	if err != nil {
@@ -62,9 +55,6 @@ func main() {
 		WriteError2Appstatus(err.Error(), 1)
 	}
 	WriteResultSuccess()
-	endTime := time.Now().Unix()
-	duration := endTime - startTime
-	_ = SendUDP(tasks.taskID, tasks.subID, "len: "+strconv.Itoa(len(tasks.records))+"; duration: "+strconv.FormatInt(duration, 10))
 	//写状态文件
 	WriteSuccess2Appstatus()
 }
